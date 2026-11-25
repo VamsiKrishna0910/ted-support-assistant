@@ -1,8 +1,10 @@
 # Ted Support Assistant: local pilot
 
-This prototype addresses the team's generic-document intake and FAQ pilot. It searches an Excel workbook by keyword, saves guided intake requests and documentation-gap reports to a local SQLite database, and can record a **mock** Halo incident.
+This prototype addresses the team's generic-document intake and FAQ pilot. It searches an Excel workbook by keyword, creates local mock PBIs for demo-validated intake requests, saves documentation-gap reports to a local SQLite database, and can record a **mock** Halo incident.
 
-**The workbook and form contain demonstration guidance, not approved TED policy.** There is no file upload, PDF/A verification, duplicate-key lookup, automated validation of the actual documents, real Halo/Azure DevOps connection, or notification to TED. Do not enter real customer information, tokens or secrets.
+The visual theme is Rabobank-inspired; this is an unofficial prototype, not an official Rabobank service.
+
+**The workbook and form contain demonstration guidance, not approved TED policy.** PDF/A, malware, DLP and service-account permission checks are simulated, not performed. Duplicate checks only cover local mock submissions. There is no real Halo/Azure DevOps or SharePoint connection, or notification to TED. Do not enter real customer information, tokens or secrets.
 
 ## Setup
 
@@ -39,9 +41,11 @@ The six included entries are **unapproved examples**. TED should replace them wi
 
 ## Test the intake and reports
 
-1. Select **Start a generic-document request**, enter fictional details, review the manual checklist and save. Replacement requests require an old key. The date format is checked, but the application cannot verify the document, keys, filename or date against real systems.
-2. Search for a missing topic and submit the documentation-gap form. Optionally select **Create a mock Halo incident**. A local `MOCK-<report id>` is shown; nothing is sent to Halo.
-3. Use a SQLite client to inspect the `document_requests` and `reports` tables in `data/reports.sqlite3`. These are local-only records; saving them does **not** create work for TED. Existing `reports` are not modified by the intake feature.
+1. Select **Start a generic-document request** and download the sample template and PDF. Complete the form with fictional details, attach either file or both, and choose a simulated service outcome. If attaching Excel, its single data row must match the form. For the prefilled sample, use Add, `sample.pdf`, English, Demo document and product types, the template's date, and key `DEMO-001`. Set a requester and environment.
+2. The demo checks the required fields, replacement old key, valid non-past effective date and duplicate new keys in the local mock database. For an attached Excel file, it checks the demo template version and columns and matching spreadsheet and form values. For an attached PDF, it checks the filename, basic readability and duplicate PDFs. Each file is limited to 5 MB. Checks requiring an absent file, including the PDF/A simulation when no PDF is provided, are shown as skipped. PDF/A compliance is not verified; service outcomes are selected simulations, not security scans. Files are processed in memory and not retained.
+3. If applicable demo checks and simulated services pass, a local `DEMO-<id>` mock PBI is saved, even when checks were skipped for a missing file. This is not a fully validated submission. Failures and intentional duplicate or legacy exceptions are rejected; no manual-review workflow exists yet. The same key or PDF cannot be reused in another mock submission. No real PBI is created.
+4. Search for a missing topic and submit the documentation-gap form. Optionally select **Create a mock Halo incident**. A local `MOCK-<report id>` is shown; nothing is sent to Halo.
+5. Use a SQLite client to inspect `mock_pbis` and `reports` in `data/reports.sqlite3`. Earlier `document_requests` records are preserved but no longer receive new entries. These are local-only records and do **not** create work for TED.
 
 Run automated tests:
 
